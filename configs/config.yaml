@@ -1,0 +1,31 @@
+# Sentiment Analysis Project
+data:
+  url: "osanseviero/twitter-airline-sentiment"
+  test_size: 0.2
+  random_state: 42
+  max_length: 128
+
+model:
+  name: "distilbert-base-uncased"
+  num_labels: 3
+  cache_dir: null
+
+training:
+  output_dir: "./models"
+  batch_size: 8
+  epochs: 3
+  learning_rate: 2e-5
+  weight_decay: 0.01
+  warmup_steps: 100
+  fp16: false
+  logging_steps: 50
+  save_strategy: "epoch"
+  eval_strategy: "epoch"
+  load_best: true
+  metric_for_best: "f1"
+  early_stopping_patience: 2
+
+labels:
+  negative: 0
+  neutral: 1
+  positive: 2

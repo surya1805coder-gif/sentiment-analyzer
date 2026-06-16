@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.so
+
+# Virtual env
+venv/
+.venv/
+env/
+
+# Model artifacts
+models/
+results/
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Model artifacts (too large for git)
+sentiment_model/
+sentiment_model.zip
+feedback.jsonl
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Config overrides
+*.local.yaml
