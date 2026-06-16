@@ -13,10 +13,6 @@
 
 ---
 
-## Demo
-
-![App Screenshot](https://via.placeholder.com/800x400.png?text=Sentiment+Analyzer+Pro+-+Add+a+screenshot+here)
-
 ---
 
 ## Quick Start
