@@ -1,29 +1,21 @@
-<div align="center">
-  <h1>Sentiment Analyzer Pro</h1>
-  <p>Fine-tuned DistilBERT for Twitter airline sentiment · General-purpose fallback · Active learning</p>
-  <p>
-    <img src="https://img.shields.io/badge/Python-3.11%2B-blue" />
-    <img src="https://img.shields.io/badge/Framework-Streamlit-red" />
-    <img src="https://img.shields.io/badge/Model-DistilBERT-orange" />
-    <img src="https://img.shields.io/badge/License-MIT-green" />
+<p align="center">
+  <h1 align="center">Sentiment Analyzer</h1>
+  <p align="center">
+    Fine-tune DistilBERT on airline tweets &middot; Serve predictions via Streamlit &middot; Active learning feedback
   </p>
-</div>
+  <p align="center">
+    <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+" />
+    <img src="https://img.shields.io/badge/Model-DistilBERT-orange" alt="DistilBERT" />
+    <img src="https://img.shields.io/badge/UI-Streamlit-red" alt="Streamlit" />
+    <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
+  </p>
+</p>
 
 ---
 
-## Features
+## Demo
 
-| # | Feature | Description |
-|---|---------|-------------|
-| 1 | **Airline Model** | DistilBERT fine-tuned on 14,640 airline tweets — Negative / Neutral / Positive |
-| 2 | **General Model** | Zero-shot sentiment pipeline for any text (toggle in sidebar) |
-| 3 | **Word Highlighting** | Sentiment-driving words highlighted green (positive) or red (negative) |
-| 4 | **Theme Extraction** | Auto-tags tweets: Baggage, Delay, Refund, Customer Service, Food, Seating |
-| 5 | **Batch CSV Upload** | Upload a CSV with a `text` column, get all predictions at once |
-| 6 | **Confidence Warnings** | Flags predictions below 60% confidence |
-| 7 | **Live Dashboard** | Plotly pie chart + theme breakdown (updates in real-time) |
-| 8 | **Active Learning** | "Was this correct?" feedback saved to `feedback.jsonl` for future retraining |
-| 9 | **Prediction History** | Session-based log of all predictions |
+![App Screenshot](https://via.placeholder.com/800x400.png?text=Sentiment+Analyzer+Pro+-+Add+a+screenshot+here)
 
 ---
 
@@ -34,77 +26,113 @@ pip install -r requirements.txt
 streamlit run app/streamlit_app.py
 ```
 
-> The fine-tuned model is **not included in git** (267MB). Train your own using Colab or download from [Releases](https://github.com/surya1805coder-gif/sentiment-analyzer/releases).
+Open `http://localhost:8501`. The app works immediately with the general-purpose model.  
+For the airline-specific model, train on Colab (see [Training](#training)).
+
+---
+
+## Features
+
+- **Airline model** — DistilBERT fine-tuned on 14,640 tweets (Negative / Neutral / Positive)
+- **General model** — Switch to a zero-shot pipeline for any non-airline text
+- **Word highlighting** — Positive words in green, negative words in red
+- **Theme extraction** — Auto-tags tweets: Baggage, Delay, Refund, Customer Service, Food, Seating
+- **Batch CSV upload** — Upload a CSV with a `text` column and get bulk predictions
+- **Confidence warnings** — Flags predictions below 60%
+- **Live dashboard** — Plotly pie chart and theme breakdown (updates in real-time)
+- **Active learning** — "Was this correct?" Yes/No feedback saved to `feedback.jsonl`
+- **Prediction history** — Session-based log of all predictions
+
+---
+
+## Usage
+
+### Single prediction
+
+Type or paste text and click **Analyze**. View sentiment, confidence score, highlighted words, and detected theme.
+
+### Batch upload
+
+Upload a CSV with a `text` column. Results appear in a table with download option.
+
+### Model toggle
+
+In the sidebar, switch between **Airline Model** (fine-tuned) and **General Model** (zero-shot). Use general for non-airline text.
 
 ---
 
 ## Training
 
-### Option A: Colab (recommended — free GPU, 15 min)
+### Option A: Colab (recommended, free GPU, ~15 min)
 
-Open and run: [`notebooks/colab_training.ipynb`](notebooks/colab_training.ipynb)
+Run [`notebooks/colab_training.ipynb`](notebooks/colab_training.ipynb) on Google Colab with a T4 GPU.  
+Download the resulting `sentiment_model.zip` and extract to `sentiment_model/`.
 
-Download the model zip → extract to `models/sentiment_model/`
-
-### Option B: Local (CPU, 7.5 hours)
+### Option B: Local (CPU only, ~7.5 hours)
 
 ```bash
 python main.py
 python main.py --epochs 5 --batch-size 16
 ```
 
-### Option C: Override config
+### Option C: Environment overrides
 
 ```bash
-SENTIMENT_BATCH_SIZE=16 SENTIMENT_EPOCHS=5 python main.py
+SENTIMENT_BATCH_SIZE=32 SENTIMENT_EPOCHS=3 python main.py
 ```
-
----
-
-## App
-
-```bash
-streamlit run app/streamlit_app.py
-```
-Then open **http://localhost:8501** (or :8502 if port changed).
 
 ---
 
 ## Project Structure
 
 ```
-├── main.py                     # Training entry point with argparse
-├── configs/config.yaml         # All hyperparams (env-overridable)
+├── main.py                     Training entry point (argparse)
+├── configs/
+│   └── config.yaml             Hyperparameters and paths
 ├── requirements.txt
 ├── Dockerfile
 ├── Makefile
 ├── .gitignore
 │
 ├── src/
-│   ├── config.py               # YAML loader + device detection + env overrides
-│   ├── utils.py                # Logging, seed setting, metadata persistence
+│   ├── config.py               YAML loader + device detection + env overrides
+│   ├── utils.py                Logging, seed setting, metadata persistence
 │   ├── data/
-│   │   ├── loader.py           # Data loading, cleaning, train/test split
-│   │   └── preprocessor.py     # Tokenization & Hugging Face Dataset construction
+│   │   ├── loader.py           Data loading, cleaning, train/test split
+│   │   └── preprocessor.py     Tokenization and dataset construction
 │   ├── model/
-│   │   └── architecture.py     # DistilBERT loading with label mappings
+│   │   └── architecture.py     DistilBERT loading with label mappings
 │   └── training/
-│       ├── trainer.py          # HF Trainer setup, weighted metrics, early stopping
-│       └── evaluator.py        # Classification report, confusion matrix
+│       ├── trainer.py          Trainer setup, metrics, early stopping
+│       └── evaluator.py        Classification report, confusion matrix
 │
 ├── app/
-│   └── streamlit_app.py        # Streamlit UI (all 9 features)
+│   └── streamlit_app.py        Streamlit UI
 │
 ├── tests/
-│   └── test_data.py            # Unit tests for data pipeline
+│   └── test_data.py            Unit tests for data pipeline
 │
 ├── notebooks/
-│   └── colab_training.ipynb    # One-click Colab training notebook
+│   └── colab_training.ipynb    One-click Colab training notebook
 │
 └── scripts/
-    ├── train.ps1               # Windows PowerShell helper
-    └── app.ps1                 # Windows app launcher
+    ├── train.ps1               Windows PowerShell helper
+    └── app.ps1                 Windows app launcher
 ```
+
+---
+
+## Configuration
+
+Edit `configs/config.yaml` or set environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SENTIMENT_BATCH_SIZE` | `16` | Training batch size |
+| `SENTIMENT_EPOCHS` | `3` | Number of training epochs |
+| `SENTIMENT_LEARNING_RATE` | `2e-5` | Learning rate |
+| `SENTIMENT_MAX_LENGTH` | `128` | Max token length |
+| `SENTIMENT_MODEL_NAME` | `distilbert-base-uncased` | Base model |
 
 ---
 
@@ -112,38 +140,26 @@ Then open **http://localhost:8501** (or :8502 if port changed).
 
 | Component | Tool |
 |-----------|------|
-| **Fine-tuning** | Hugging Face Transformers + Trainer API |
-| **Inference** | PyTorch + Transformers pipeline |
-| **UI** | Streamlit |
-| **Visualization** | Plotly |
-| **Dataset** | Twitter US Airline Sentiment (Hugging Face) |
-| **ML Platform** | Google Colab (T4 GPU) |
-| **Container** | Docker |
+| Fine-tuning | Hugging Face Transformers + Trainer API |
+| Inference | PyTorch + Transformers pipeline |
+| UI | Streamlit |
+| Visualization | Plotly |
+| Dataset | Twitter US Airline Sentiment (Hugging Face) |
+| Training platform | Google Colab (T4 GPU) |
+| Container | Docker |
 
 ---
 
-## Model Details
+## FAQ
 
-- **Architecture:** DistilBERT (66M params, 97% BERT performance, 60% smaller)
-- **Training data:** 14,640 tweets (11,712 train / 2,928 validation)
-- **Labels:** Negative, Neutral, Positive
-- **Metrics tracked:** Accuracy, weighted F1, precision, recall
+**The airline model gives low confidence on non-airline text.**  
+Use the **General Model** toggle in the sidebar for general text.
 
-### Why DistilBERT?
+**The fine-tuned model isn't included in the repo.**  
+It's 267MB — exceeds GitHub's limit. Train on Colab or download from Releases.
 
-| Metric | BERT-Base | DistilBERT |
-|--------|-----------|------------|
-| Parameters | 110M | **66M** |
-| Inference speed | 1x | **1.6x** |
-| Language understanding | 100% | **97%** |
-
----
-
-## Weaknesses
-
-- **Airline-only domain** — general text (philosophy, food, etc.) gets low-confidence predictions. Use "General Model" toggle for those.
-- **2015 dataset** — trained on tweets from 2015; may miss modern slang.
-- **CPU training** — 7.5 hours locally; Colab GPU does it in 15 minutes.
+**How do I contribute?**  
+Open an issue or submit a PR. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
