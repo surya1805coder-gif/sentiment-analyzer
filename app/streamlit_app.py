@@ -57,6 +57,9 @@ def load_general_pipeline():
 
 _general_pipe = load_general_pipeline()
 
+# ── Deploy check: if airline model is missing, default to General ────────
+
+_AIRLINE_AVAILABLE = MODEL_DIR.exists()
 
 # ── Airline Prediction ───────────────────────────────────────────────────
 
@@ -135,8 +138,12 @@ st.set_page_config(page_title="Sentiment Analyzer Pro", page_icon="\U0001f4ac", 
 
 with st.sidebar:
     st.header("\u2699\ufe0f Settings")
+    if not _AIRLINE_AVAILABLE:
+        st.warning("Airline model not found. Using General model. See GitHub to train it.")
     mode = st.radio("Model Mode", ["Airline Model", "General Model"],
-                    index=0, help="Airline = trained on tweets. General = works on any text.")
+                    index=0 if _AIRLINE_AVAILABLE else 1,
+                    help="Airline = trained on tweets. General = works on any text.",
+                    disabled=not _AIRLINE_AVAILABLE)
     st.session_state.model_mode = mode
     st.divider()
     show_history = st.checkbox("Show Prediction History", value=True)
@@ -166,11 +173,11 @@ with st.expander("\U0001f4c1 Batch Upload CSV", expanded=False):
             if texts:
                 st.info(f"Analyzing {len(texts)} tweets...")
                 airline_model = None
-                if mode == "Airline Model":
+                if mode == "Airline Model" and _AIRLINE_AVAILABLE:
                     airline_model, tok, dev = load_airline_model()
                 batch_results = []
                 for t in texts:
-                    if mode == "Airline Model":
+                    if mode == "Airline Model" and _AIRLINE_AVAILABLE:
                         p, c, probs, _ = predict_airline(t, *airline_model)
                     else:
                         p, c, probs, _ = predict_general(t)
@@ -205,7 +212,7 @@ if analyze:
         st.warning("Please enter some text.")
     else:
         with st.spinner("Analyzing..."):
-            if mode == "Airline Model":
+            if mode == "Airline Model" and _AIRLINE_AVAILABLE:
                 model, tokenizer, device = load_airline_model()
                 pred, conf, probs, cleaned = predict_airline(tweet, model, tokenizer, device)
             else:
